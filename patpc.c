@@ -221,6 +221,8 @@ void write_phase_folded_and_binned_lightcurve( double *photon_arrival_times_sec,
 }
 
 int main( int argc, char **argv ) {
+ FILE *logfile;
+
  FILE *outputfile;
 
  FILE *inputfile;
@@ -263,6 +265,7 @@ int main( int argc, char **argv ) {
  double Hm_probability_corrected_for_number_of_trials;
 
  char input_line_buffer[1024];
+ char output_line_buffer[1024];
 
  // print out the welcome message
  say_hello( argv );
@@ -417,8 +420,18 @@ int main( int argc, char **argv ) {
   return 1;
  }
 
+ logfile= fopen( "patpc.log", "w" );
+ if ( NULL == logfile ) {
+  fprintf( stderr, "ERROR: cannot open log file 'patpc.log' for writing!\n" );
+  return 1;
+ }
+
+ fprintf( logfile, "Input file: %s\n\n", argv[1] );
+
  average_countrate= (double)number_of_photons / T;
- fprintf( stderr, "The average count rate (assuming a non-interrupted observation) is %lg cts/s\n", average_countrate );
+ sprintf( output_line_buffer, "The average count rate (assuming a non-interrupted observation) is %lg cts/s\n", average_countrate );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
 
 #ifndef PATPC_NOGSL
  double maximum_difference_between_photon_arrival_times_sec;
@@ -435,9 +448,15 @@ int main( int argc, char **argv ) {
  minimum_difference_between_photon_arrival_times_sec= gsl_stats_min( differences_between_photon_arrival_times_sec, 1, number_of_photons - 1 );
  maximum_difference_between_photon_arrival_times_sec= gsl_stats_max( differences_between_photon_arrival_times_sec, 1, number_of_photons - 1 );
  free( differences_between_photon_arrival_times_sec );
- fprintf( stderr, "The minimum difference between photon arrival times is %lf sec (detector reponse time?)\n", minimum_difference_between_photon_arrival_times_sec );
- fprintf( stderr, "The median difference between photon arrival times is %lf sec, corresponding to the count rate of %lf cts/s\n", median_difference_between_photon_arrival_times_sec, 1.0 / median_difference_between_photon_arrival_times_sec );
- fprintf( stderr, "The maximum difference between photon arrival times is %lf sec (gap in coverage?)\n", maximum_difference_between_photon_arrival_times_sec );
+ sprintf( output_line_buffer, "The minimum difference between photon arrival times is %lf sec (detector reponse time?)\n", minimum_difference_between_photon_arrival_times_sec );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "The median difference between photon arrival times is %lf sec, corresponding to the count rate of %lf cts/s\n", median_difference_between_photon_arrival_times_sec, 1.0 / median_difference_between_photon_arrival_times_sec );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "The maximum difference between photon arrival times is %lf sec (gap in coverage?)\n", maximum_difference_between_photon_arrival_times_sec );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
 #endif
 
  // automatically choose pmax value
@@ -493,15 +512,33 @@ int main( int argc, char **argv ) {
   N_freq_presumably_independent= number_of_photons;
  }
 
- fprintf( stderr, "\nSearch parameters:\n" );
- fprintf( stderr, "Pmax = %lf sec (%lf Hz)\n", pmax, fmin );
- fprintf( stderr, "Pmin = %lf sec (%lf Hz)\n", pmin, fmax );
- fprintf( stderr, "Phase step = %lf (%lf Hz)\n", phase_step, df );
- fprintf( stderr, "\nDerived parameters:\n" );
- fprintf( stderr, "Number of frequency steps = %ld\n", N_freq );
- fprintf( stderr, "Estimated number of independent frequencies = %ld\n", N_freq_presumably_independent );
- fprintf( stderr, "Nyquist frequency = %lf Hz (%lf sec)\n", Nyquist_frequency, 1.0 / Nyquist_frequency );
- fprintf( stderr, "Duration of observations = %lf sec\n", T );
+ sprintf( output_line_buffer, "\nSearch parameters:\n" );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "Pmax = %lf sec (%lf Hz)\n", pmax, fmin );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "Pmin = %lf sec (%lf Hz)\n", pmin, fmax );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "Phase step = %lf (%lf Hz)\n", phase_step, df );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "\nDerived parameters:\n" );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "Number of frequency steps = %ld\n", N_freq );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "Estimated number of independent frequencies = %ld\n", N_freq_presumably_independent );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "Nyquist frequency = %lf Hz (%lf sec)\n", Nyquist_frequency, 1.0 / Nyquist_frequency );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "Duration of observations = %lf sec\n", T );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
 
  freq= malloc( N_freq * sizeof( double ) );
  power= malloc( N_freq * sizeof( double ) );
@@ -514,6 +551,8 @@ int main( int argc, char **argv ) {
  for ( frequency_counter= 0; frequency_counter < N_freq; frequency_counter++ ) {
   Z2[frequency_counter]= malloc( m * sizeof( double ) );
  }
+
+ fprintf( stderr, "Running the period search...\n" );
 
 // Main loop in frequency
 #ifdef _OPENMP
@@ -553,16 +592,26 @@ int main( int argc, char **argv ) {
    Hm_peak_frequency= freq[frequency_counter];
   }
  }
- fprintf( stderr, "\nResults:\n" );
- fprintf( stderr, "The peak power is at period %7.3lf sec (%.7lf Hz)  %lf\n", 1.0 / power_peak_frequency, power_peak_frequency, power_peak );
+ sprintf( output_line_buffer, "\nResults:\n" );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
+ sprintf( output_line_buffer, "The peak power is at period %7.3lf sec (%.7lf Hz)  %lf\n", 1.0 / power_peak_frequency, power_peak_frequency, power_peak );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
  // Rayleigh resolution criterion gives the minimum accuracy attainable by simple counting of cycles,
  // see e.g. https://ui.adsabs.harvard.edu/abs/2003ASPC..292..383S/abstract
- fprintf( stderr, "Rayleigh resolution      +/-%7.3lf sec (%.7lf Hz)\n", 1.0 * ( 1.0 / power_peak_frequency * 1.0 / power_peak_frequency ) / T, 1.0 / T );
+ sprintf( output_line_buffer, "Rayleigh resolution      +/-%7.3lf sec (%.7lf Hz)\n", 1.0 * ( 1.0 / power_peak_frequency * 1.0 / power_peak_frequency ) / T, 1.0 / T );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
  //
- fprintf( stderr, "The peak Hm is at period    %7.3lf sec (%.7lf Hz)  %lf\n", 1.0 / Hm_peak_frequency, Hm_peak_frequency, Hm_peak );
+ sprintf( output_line_buffer, "The peak Hm is at period    %7.3lf sec (%.7lf Hz)  %lf\n", 1.0 / Hm_peak_frequency, Hm_peak_frequency, Hm_peak );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
  // Rayleigh resolution criterion gives the minimum accuracy attainable by simple counting of cycles,
  // see e.g. https://ui.adsabs.harvard.edu/abs/2003ASPC..292..383S/abstract
- fprintf( stderr, "Rayleigh resolution      +/-%7.3lf sec (%.7lf Hz)\n", 1.0 * ( 1.0 / Hm_peak_frequency * 1.0 / Hm_peak_frequency ) / T, 1.0 / T );
+ sprintf( output_line_buffer, "Rayleigh resolution      +/-%7.3lf sec (%.7lf Hz)\n", 1.0 * ( 1.0 / Hm_peak_frequency * 1.0 / Hm_peak_frequency ) / T, 1.0 / T );
+ fputs( output_line_buffer, logfile );
+ fputs( output_line_buffer, stderr );
 
  Hm_probability= compute_false_detection_probability_from_Hm( Hm_peak, &upper_limit_flag );
  // Bandwidth/Multitrial correction
@@ -571,11 +620,19 @@ int main( int argc, char **argv ) {
  // for a discussion of period uncertainty and the meaning of phase step see also
  // https://ui.adsabs.harvard.edu/abs/2018MNRAS.481.3083F/abstract
  if ( upper_limit_flag == 0 ) {
-  fprintf( stderr, "Estimated single-trial probability of obtaining the above Hm value by chance is  %lg\n", Hm_probability );
-  fprintf( stderr, "Same probability corrected for the number of trials (%6ld independent frequencies) %lg\n", N_freq_presumably_independent, Hm_probability_corrected_for_number_of_trials );
+  sprintf( output_line_buffer, "Estimated single-trial probability of obtaining the above Hm value by chance is  %lg\n", Hm_probability );
+  fputs( output_line_buffer, logfile );
+  fputs( output_line_buffer, stderr );
+  sprintf( output_line_buffer, "Same probability corrected for the number of trials (%6ld independent frequencies) %lg\n", N_freq_presumably_independent, Hm_probability_corrected_for_number_of_trials );
+  fputs( output_line_buffer, logfile );
+  fputs( output_line_buffer, stderr );
  } else {
-  fprintf( stderr, "Estimated single-trial probability of obtaining the above Hm value by chance is <%lg\n", Hm_probability );
-  fprintf( stderr, "Probability corrected for the number of trials (%6ld independent frequencies) <%lg\n", N_freq_presumably_independent, Hm_probability_corrected_for_number_of_trials );
+  sprintf( output_line_buffer, "Estimated single-trial probability of obtaining the above Hm value by chance is <%lg\n", Hm_probability );
+  fputs( output_line_buffer, logfile );
+  fputs( output_line_buffer, stderr );
+  sprintf( output_line_buffer, "Probability corrected for the number of trials (%6ld independent frequencies) <%lg\n", N_freq_presumably_independent, Hm_probability_corrected_for_number_of_trials );
+  fputs( output_line_buffer, logfile );
+  fputs( output_line_buffer, stderr );
  }
 
  // free-up the memory
@@ -586,6 +643,9 @@ int main( int argc, char **argv ) {
 
  // write-out the results
  fprintf( stderr, "\nWriting the output files\n" );
+
+ fclose( logfile );
+ fprintf( stderr, "\nThe logs are saved to 'patpc.log'\n" );
 
  // write power spectrum
  outputfile= fopen( "power.dat", "w" );
