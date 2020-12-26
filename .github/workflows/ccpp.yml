@@ -19,5 +19,7 @@ jobs:
       run: make
     - name: Install GSL
       run: sudo apt-get install libgsl-dev
+    - name: make with GSL
+      run: make
     - name: Run test
       run: ./test_patpc.sh
