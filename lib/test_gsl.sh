@@ -13,7 +13,7 @@ int main() {
 " > testprog.c
 
 # check if it compiles
-cc -o testprog testprog.c -lm -lgsl -lgslcblas
+cc -o testprog testprog.c -lm -lgsl -lgslcblas &>/dev/null
 if [ $? -ne 0 ];then
  GSL_OK=0
 else
