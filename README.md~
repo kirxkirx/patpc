@@ -22,7 +22,6 @@ or
 ./patpc phton_arrival_times.txt
 ````
 This will print the parameters of the highest peak of the Hm periodogram and the power spectrum to the terminal. The code will also try to create plots of the power spectrum, Hm periodogram, binned lighcurve as a function of time, binned lightcurve as a functon of phase (folded with the period corresponding to the highest Hm periodogram peak).
-You may modify the plots by editing `plot_everything.gnuplot` and re-running `gnuplot plot_everything.gnuplot`.
 
 You may also manually specify the search parameters:
 ````
