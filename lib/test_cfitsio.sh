@@ -13,7 +13,7 @@ int main() {
 " > testprog.c
 
 # check if it compiles
-cc -o testprog testprog.c -lm -lgsl -lgslcblas &>/dev/null
+cc -o testprog testprog.c -lm -lcfitsio &>/dev/null
 if [ $? -ne 0 ];then
  CFITSIO_OK=0
 else
