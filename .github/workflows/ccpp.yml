@@ -14,10 +14,10 @@ jobs:
     - name: make without anything
       run: make
     - name: Install CFITSIO
-      run: sudo apt-get libcfitsio-dev
+      run: sudo apt-get install libcfitsio-dev
     - name: make with CFITSIO
       run: make
     - name: Install GSL
-      run: sudo apt-get libgsl-dev
+      run: sudo apt-get install libgsl-dev
     - name: Run test
       run: ./test_patpc.sh
