@@ -1,0 +1,23 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Update apt-get
+      run: sudo apt-get update
+    - name: make without anything
+      run: make
+    - name: Install CFITSIO
+      run: sudo apt-get libcfitsio-dev
+    - name: make with CFITSIO
+      run: make
+    - name: Install GSL
+      run: sudo apt-get libgsl-dev
+    - name: Run test
+      run: ./test_patpc.sh
