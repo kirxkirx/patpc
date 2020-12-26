@@ -631,7 +631,7 @@ int main( int argc, char **argv ) {
   fprintf( stderr, "Making Hm periodogram, power spectrum and phase plots with GNUplot\n" );
   fprintf( stderr, "To change the plots, edit 'plot_everything.gnuplot' and run 'gnuplot plot_everything.gnuplot'\n" );
  } else {
-  fprintf( stderr, "ERROR making Hm periodogram, power spectrum and phase plots with GNUplot\n" );
+  fprintf( stderr, "ERROR making plots with GNUplot\n" );
  }
 
  // we are done
