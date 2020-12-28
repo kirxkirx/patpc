@@ -1,5 +1,5 @@
 ### photon arrival time periodicity code (patpc)
-This code will search for a period in photon arrival times (as opposed to "countrate as a function of time" = "lightcurve") data in the context of X-ray and gamma-ray astronomy. This is a C implementation of the Hm test [(de Jager, Raubenheimer & Swanepoel, 1989)](https://ui.adsabs.harvard.edu/abs/1989A&A...221..180D). The chance occurance probability for a periodogram peak is calculated as `Prob(> H) = exp (−0.4H)` following equation (5) of [de Jager & Büsching (2010)](https://ui.adsabs.harvard.edu/abs/2010A&A...517L...9D) and corrected for multiple trials using an estimate of the number of independent frequencies as suggested by [Schwarzenberg-Czerny (2003)](https://adsabs.harvard.edu/abs/2003ASPC..292..383S). While writing the code I was following the explanation of the Hm test by [Kerr (2011)](http://adsabs.harvard.edu/abs/2011ApJ...732...38K). The code makes use of multiple processing cores thanks to [OpenMP](https://en.wikipedia.org/wiki/OpenMP).
+This code will search for a period in photon arrival times (as opposed to "countrate as a function of time" = "lightcurve") data in the context of X-ray and gamma-ray astronomy. This is a C implementation of the Hm test [(de Jager, Raubenheimer & Swanepoel, 1989)](https://ui.adsabs.harvard.edu/abs/1989A&A...221..180D). The chance occurrence probability for a periodogram peak is calculated as `Prob(> H) = exp (−0.4H)` following equation (5) of [de Jager & Büsching (2010)](https://ui.adsabs.harvard.edu/abs/2010A&A...517L...9D) and corrected for multiple trials using an estimate of the number of independent frequencies as suggested by [Schwarzenberg-Czerny (2003)](https://adsabs.harvard.edu/abs/2003ASPC..292..383S). While writing the code I was following the explanation of the Hm test by [Kerr (2011)](http://adsabs.harvard.edu/abs/2011ApJ...732...38K). The code makes use of multiple processing cores thanks to [OpenMP](https://en.wikipedia.org/wiki/OpenMP).
 
 ### Requirements
 In order to compile and run the code you'll need:
@@ -13,15 +13,15 @@ In order to compile and run the code you'll need:
 Download and unpack the archive or clone this repository, then run `make`.
 
 ### Usage
-Specify the OGIP FITS event file or a single-column ASCII file lisitng the photon arrival times in seconds as the command line argument:
+Specify the OGIP FITS event file or a single-column ASCII file listing the photon arrival times in seconds as the command line argument:
 ````
 ./patpc event_file.evt
 ````
 or
 ````
-./patpc phton_arrival_times.txt
+./patpc photon_arrival_times.txt
 ````
-This will print the parameters of the highest peak of the Hm periodogram and the power spectrum to the terminal. The code will also try to create plots of the power spectrum, Hm periodogram, binned lighcurve as a function of time, binned lightcurve as a functon of phase (folded with the period corresponding to the highest Hm periodogram peak).
+This will print the parameters of the highest peak of the Hm periodogram and the power spectrum to the terminal. The code will also try to create plots of the power spectrum, Hm periodogram, binned lightcurve as a function of time, binned lightcurve as a function of phase (folded with the period corresponding to the highest Hm periodogram peak).
 You may modify the plots by editing `plot_everything.gnuplot` and re-running `gnuplot plot_everything.gnuplot`.
 
 You may also manually specify the search parameters:
@@ -30,5 +30,12 @@ You may also manually specify the search parameters:
 ````
 where 5000 is the maximum trial period in seconds, 5 is the minimum trial period in seconds, 0.1 is the maximum phase shift between the first and the last point of the lightcurve (determines the width of the step between the trial frequencies).
 
+### Example plots
+
+![](images_for_README/powerspec_comparison_with_xronos.png)
+Comparison of the power spectrum computed with `patpc` and `XRONOS`/`powspec`
+using the same event file as an input.
+
+### Contribute
 
 Bug reports, pull requests and feature suggestions are warmly welcome!
