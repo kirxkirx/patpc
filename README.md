@@ -33,8 +33,8 @@ where 5000 is the maximum trial period in seconds, 5 is the minimum trial period
 ### Example plots
 
 ![](images_for_README/powerspec_comparison_with_xronos.png)
-Comparison of the power spectrum computed with `patpc` and [XRONOS](https://heasarc.gsfc.nasa.gov/xanadu/xronos/xronos.html)/`powspec`
-using the same event file as an input.
+Comparison of the power spectruma computed with `patpc` and [XRONOS](https://heasarc.gsfc.nasa.gov/xanadu/xronos/xronos.html)/`powspec`
+from the same event file.
 
 ### Contribute
 
