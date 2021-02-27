@@ -13,7 +13,7 @@ In order to compile and run the code you'll need:
 Download and unpack the archive or clone this repository, then run `make`.
 
 ### Usage
-Specify the OGIP FITS event file or a single-column ASCII file listing the photon arrival times in seconds as the command line argument:
+Specify the [OGIP FITS event file](https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/events/ogip_94_003/ogip_94_003.html) or a single-column ASCII file listing the photon arrival times in seconds as the command line argument:
 ````
 ./patpc event_file.evt
 ````
@@ -33,8 +33,18 @@ where 5000 is the maximum trial period in seconds, 5 is the minimum trial period
 ### Example plots
 
 ![](images_for_README/powerspec_comparison_with_xronos.png)
-Comparison of the power spectruma computed with `patpc` and [XRONOS](https://heasarc.gsfc.nasa.gov/xanadu/xronos/xronos.html)/`powspec`
-from the same event file.
+Comparison of the power spectra computed with `patpc`, [XRONOS](https://heasarc.gsfc.nasa.gov/xanadu/xronos/xronos.html)/`powspec`
+and [z2n-periodogram](https://github.com/YohanAlexander/z2n-periodogram) codes from the same event file.
+The slight difference with [XRONOS](https://heasarc.gsfc.nasa.gov/xanadu/xronos/xronos.html)/`powspec`
+is because it computes a different thing: rather than follow the Discrete
+Fourier Transform definition directly ([Deeming, 1975](https://ui.adsabs.harvard.edu/abs/1975Ap%26SS..36..137D/abstract)) 
+as `patpc` and `z2n-periodogram` do, 
+`powspec` produces a binned ``lightcurve'' with a regular sampling where most of 
+the measurements are 0 (no photons arrived), 
+some measurements are equal to 1 (one photon arrived) and maybe some bins have more than one photon.
+Then `powspec` runs an FFT on this lightcurve. Overall, this procedure is
+similar, but not the same as computing the Discrete Fourier Transform over
+the list of photon arrival times.
 
 ### Contribute
 
