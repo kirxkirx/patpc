@@ -30,7 +30,11 @@ static int compare_phases( const void *obs11, const void *obs22 ) {
 #endif
 
 void print_usage_info( char **argv ) {
- fprintf( stderr, "Usage: %s photon_arrival_times_sec.dat\n or\n       %s photon_arrival_times_sec.dat Pmax(sec) Pmin(sec) phasestep\n", argv[0], argv[0] );
+ fprintf( stderr, "Usage:\n %s photon_arrival_times_sec.dat\n or\n %s photon_arrival_times_sec.dat Pmax(sec) Pmin(sec) phasestep\n", argv[0], argv[0] );
+#ifndef PATPC_NOCFITSIO
+ fprintf( stderr, "You may also specify an event FITS file as the input:\n %s photon_arrival_times_sec.evt\n or\n %s photon_arrival_times_sec.svt Pmax(sec) Pmin(sec) phasestep\n", argv[0], argv[0] );
+#endif
+
  return;
 }
 
