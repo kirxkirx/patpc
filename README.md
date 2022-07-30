@@ -7,7 +7,7 @@ In order to compile and run the code you'll need:
 * `GNU make` (you'll need to install it if you are on Mac or something)
 * [CFITSIO library](https://heasarc.gsfc.nasa.gov/fitsio/) (optional, needed to read [OGIP FITS event files](https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/events/ogip_94_003/ogip_94_003.html))
 * [GNU Scientific Library](https://en.wikipedia.org/wiki/GNU_Scientific_Library) (optional)
-* [gnuplot](https://en.wikipedia.org/wiki/Gnuplot) and [ImageMagick](https://en.wikipedia.org/wiki/ImageMagick) `covert` for plotting (optional)
+* [gnuplot](https://en.wikipedia.org/wiki/Gnuplot) and [ImageMagick](https://en.wikipedia.org/wiki/ImageMagick) `convert` for plotting (optional)
 
 ### Installation
 Download and unpack the archive or clone this repository, then run `make`.
