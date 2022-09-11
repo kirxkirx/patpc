@@ -1,7 +1,7 @@
 ### photon arrival time periodicity code (patpc)
 This code will search for a period in photon arrival times (as opposed to "countrate as a function of time" = "lightcurve") data in the context of X-ray and gamma-ray astronomy. This is a C implementation of the Hm test [(de Jager, Raubenheimer & Swanepoel, 1989)](https://ui.adsabs.harvard.edu/abs/1989A&A...221..180D). The chance occurrence probability for a periodogram peak is calculated as `Prob(> H) = exp (−0.4H)` following equation (5) of [de Jager & Büsching (2010)](https://ui.adsabs.harvard.edu/abs/2010A&A...517L...9D) and corrected for multiple trials using an estimate of the number of independent frequencies as suggested by [Schwarzenberg-Czerny (2003)](https://adsabs.harvard.edu/abs/2003ASPC..292..383S). While writing the code I was following the explanation of the Hm test by [Kerr (2011)](http://adsabs.harvard.edu/abs/2011ApJ...732...38K). The code makes use of multiple processing cores thanks to [OpenMP](https://en.wikipedia.org/wiki/OpenMP).
 
-A detailed description of patpc is given by [Sokolovsky et al. (2022)](https://ui.adsabs.harvard.edu/abs/2022ApJ...934..142S/abstract).
+A detailed description of patpc is given in the Appendix by [Sokolovsky et al. (2022)](https://ui.adsabs.harvard.edu/abs/2022ApJ...934..142S/abstract).
 
 ### Requirements
 In order to compile and run the code you'll need:
