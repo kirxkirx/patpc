@@ -30,7 +30,7 @@ static int compare_phases( const void *obs11, const void *obs22 ) {
 #endif
 
 void print_usage_info( char **argv ) {
- fprintf( stderr, "Usage:\n %s photon_arrival_times_sec.dat\n or\n %s photon_arrival_times_sec.dat Pmax(sec) Pmin(sec) phasestep\n", argv[0], argv[0] );
+ fprintf( stderr, "Usage:\n %s photon_arrival_times_sec.dat  # Automatically select period search range\n or\n %s photon_arrival_times_sec.dat P(sec)  # Test significance of a single priod\n or\n %s photon_arrival_times_sec.dat Pmax(sec) Pmin(sec)  # Search a range of trial periods\n or\n %s photon_arrival_times_sec.dat Pmax(sec) Pmin(sec) phasestep  # Set search step size\n", argv[0], argv[0], argv[0], argv[0] );
 #ifndef PATPC_NOCFITSIO
  fprintf( stderr, "You may also specify an event FITS file as the input:\n %s photon_arrival_times_sec.evt\n or\n %s photon_arrival_times_sec.svt Pmax(sec) Pmin(sec) phasestep\n", argv[0], argv[0] );
 #endif
@@ -304,6 +304,10 @@ int main( int argc, char **argv ) {
   } else {
    fprintf( stderr, "The input value %lf seems unreasnoable\n", input_value_double );
   }
+ } else {
+  // if no minimum period is given ->
+  // -> we are in the signle-frewuqncy mode
+  pmin= pmax;
  }
  // make sure pmax>pmin (the order is not confused)
  if ( pmin > pmax ) {
@@ -513,10 +517,16 @@ int main( int argc, char **argv ) {
  }
 
  // old test
- if ( N_freq < 10 ) {
-  fprintf( stderr, "ERROR: N_freq=%ld\n", N_freq );
-  return 1;
+ //if ( N_freq < 10 ) {
+ // fprintf( stderr, "ERROR: N_freq=%ld\n", N_freq );
+ // return 1;
+ //}
+ 
+ // Special single-frequency case
+ if( pmin == pmax ) {
+  N_freq=1;
  }
+ 
 
  // update the estimated number of independent frequencies following the shaman ritual of Schwarzenberg-Czerny (2003), Sec. 5.3
  // https://ui.adsabs.harvard.edu/abs/2003ASPC..292..383S/abstract
@@ -595,7 +605,9 @@ int main( int argc, char **argv ) {
  }
 
  // find the power and Hm peaks
+ power_peak_frequency= freq[0];
  power_peak= power[0];
+ Hm_peak_frequency= freq[0];
  Hm_peak= Hm[0];
  for ( frequency_counter= 0; frequency_counter < N_freq; frequency_counter++ ) {
   if ( power_peak < power[frequency_counter] ) {

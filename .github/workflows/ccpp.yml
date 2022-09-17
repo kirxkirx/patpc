@@ -13,6 +13,8 @@ jobs:
       run: sudo apt-get update
     - name: make without anything
       run: make
+    - name: test without anything
+      run: make test
     - name: Install CFITSIO
       run: sudo apt-get install libcfitsio-dev
     - name: make with CFITSIO
@@ -21,5 +23,7 @@ jobs:
       run: sudo apt-get install libgsl-dev
     - name: make with GSL
       run: make
-    - name: Run test
+    - name: test with GSL
+      run: make test
+    - name: Run simulator test
       run: ./test_patpc.sh
