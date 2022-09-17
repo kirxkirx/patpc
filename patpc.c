@@ -2,6 +2,8 @@
 
 #define TWOPI 2.0 * M_PI
 
+#define CHOOSE_PMAX_AUTOMATICALLY 1001
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -243,7 +245,7 @@ int main( int argc, char **argv ) {
  double fmin, fmax, T;
 
  // default values of paximum and minimum trial periods and the phase step
- double pmax= 1001;
+ double pmax= CHOOSE_PMAX_AUTOMATICALLY;
  double pmin= 9;
  double phase_step= 0.1;
 
@@ -306,8 +308,11 @@ int main( int argc, char **argv ) {
   }
  } else {
   // if no minimum period is given ->
-  // -> we are in the signle-frewuqncy mode
-  pmin= pmax;
+  // -> and we are not selecting the period automatically
+  if ( pmax != CHOOSE_PMAX_AUTOMATICALLY ) {
+   // -> we are in the signle-frequency mode
+   pmin= pmax;
+  }
  }
  // make sure pmax>pmin (the order is not confused)
  if ( pmin > pmax ) {
@@ -324,7 +329,6 @@ int main( int argc, char **argv ) {
    fprintf( stderr, "The input value %lf seems unreasnoable\n", input_value_double );
   }
  }
-
  number_of_photons= 0;
  // read photon arrival times from an OGIP FITS file
 #ifndef PATPC_NOCFITSIO
