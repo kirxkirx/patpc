@@ -309,7 +309,7 @@ int main( int argc, char **argv ) {
  if ( pmin > pmax ) {
   input_value_double= pmax;
   pmax= pmin;
-  pmin= pmax;
+  pmin= input_value_double;
  }
  // step in phase should be 1,0 or smaller, 0.1 is a good starting point
  if ( argc == 5 ) {
@@ -492,7 +492,12 @@ int main( int argc, char **argv ) {
  // estimate the number of independent frequencies
  df= 1.0 / T;
  N_freq_presumably_independent= ( size_t )( ( fmax - fmin ) / df + 0.5 );
- if ( N_freq_presumably_independent < 10 ) {
+ // We may be interested to test if there is any significant variability present at a given frequency
+ //if ( N_freq_presumably_independent < 10 ) {
+ if ( N_freq_presumably_independent == 0 ) {
+  N_freq_presumably_independent= 1;
+ }
+ if ( N_freq_presumably_independent < 0 ) {
   fprintf( stderr, "ERROR: N_freq_presumably_independent=%ld\n", N_freq_presumably_independent );
   return 1;
  }
@@ -502,6 +507,12 @@ int main( int argc, char **argv ) {
  df= phase_step / T;
  N_freq= ( size_t )( ( fmax - fmin ) / df + 0.5 );
 
+ // If we are asked to explore a very narrow frequency range - do it
+ if( N_freq<10 ) {
+  N_freq= 10;
+ }
+
+ // old test
  if ( N_freq < 10 ) {
   fprintf( stderr, "ERROR: N_freq=%ld\n", N_freq );
   return 1;
