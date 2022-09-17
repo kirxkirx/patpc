@@ -357,8 +357,10 @@ int main( int argc, char **argv ) {
      fprintf( stderr, "Found TIME column of type %d\nFor reference:\n21 -- signed short,              'I'\n41 -- signed long,\n81 -- 64-bit long signed integer 'K'\n42 -- single precision float,    'E'\n82 -- double precision float,    'D'\naccording to https://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/node20.html\n", colnum_TIME_type );
      number_of_photons= num_rows;
      if ( number_of_photons < 100 ) {
-      fprintf( stderr, "ERROR: too few photons: %ld\n", number_of_photons );
-      return 1;
+      if ( pmin != pmax ) {
+       fprintf( stderr, "ERROR: too few photons for period search: %ld\n", number_of_photons );
+       return 1;
+      }
      }
      fprintf( stderr, "The input table '%s' contains %ld rows\n", filename_with_events_extension, number_of_photons );
      photon_arrival_times_sec= (double *)malloc( number_of_photons * sizeof( double ) );
@@ -391,8 +393,10 @@ int main( int argc, char **argv ) {
   number_of_photons= count_lines_in_ASCII_file( argv[1] );
 
   if ( number_of_photons < 100 ) {
-   fprintf( stderr, "ERROR: too few photons: %ld\n", number_of_photons );
-   return 1;
+   if ( pmin != pmax ) { 
+    fprintf( stderr, "ERROR: too few photons for period search: %ld\n", number_of_photons );
+    return 1;
+   }
   } else {
    fprintf( stderr, "The input ASCII file '%s' contains %ld lines\n", argv[1], number_of_photons );
   }
@@ -416,6 +420,12 @@ int main( int argc, char **argv ) {
   fprintf( stderr, "Got arrival times of %ld photons (expected %ld) from the input ASCII file\n", photon_counter, number_of_photons );
   // Reset number_of_photons as the number of photons may differ from the number of lines in the input file (due to omments or empty lines)
   number_of_photons= photon_counter;
+ }
+
+ // Test if one way or the other we have read some photons
+ if ( number_of_photons < 2 ) {
+  fprintf( stderr, "ERROR: the input file '%s' contains only %ld photon(s)\n", argv[1], number_of_photons );
+  return 1;
  }
 
  // sorting photon arrival times just for the sake of conviniently getting the observation time range
