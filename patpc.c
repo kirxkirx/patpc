@@ -356,10 +356,15 @@ int main( int argc, char **argv ) {
     if ( status == 0 ) {
      fprintf( stderr, "Found TIME column of type %d\nFor reference:\n21 -- signed short,              'I'\n41 -- signed long,\n81 -- 64-bit long signed integer 'K'\n42 -- single precision float,    'E'\n82 -- double precision float,    'D'\naccording to https://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/node20.html\n", colnum_TIME_type );
      number_of_photons= num_rows;
-     if ( number_of_photons < 100 ) {
+     if ( number_of_photons < 50 ) {
       if ( pmin != pmax ) {
        fprintf( stderr, "ERROR: too few photons for period search: %ld\n", number_of_photons );
        return 1;
+      }
+     }
+     if ( number_of_photons < 100 ) {
+      if ( pmin != pmax ) {
+       fprintf( stderr, "ERROR: too few photons - period search may be unreliable: %ld\n", number_of_photons );
       }
      }
      fprintf( stderr, "The input table '%s' contains %ld rows\n", filename_with_events_extension, number_of_photons );
