@@ -48,6 +48,23 @@ Then `powspec` runs an FFT on this lightcurve. Overall, this procedure is
 similar, but not the same as computing the Discrete Fourier Transform over
 the list of photon arrival times.
 
+### swift_pointing_evt_splitter
+This utility splits event files (FITS or ASCII) into separate chunks whenever there is a gap larger than 1000 seconds between consecutive events. 
+This is useful for handling observations with multiple pointings, such as Swift satellite observations. The tool reads photon arrival times, 
+identifies time gaps, and creates separate output files for each continuous observation segment. Output files are automatically named with sequential numbering 
+(e.g., `inputfile_01.evt`, `inputfile_02.evt`, etc.). When compiled with CFITSIO support, it can process both FITS event files and plain text files; 
+otherwise, it handles text files only.
+
+````
+./swift_pointing_evt_splitter event_file.evt
+````
+or
+````
+./swift_pointing_evt_splitter photon_arrival_times.txt
+````
+
+
+
 ### Contribute
 
 Bug reports, pull requests and feature suggestions are warmly welcome!
