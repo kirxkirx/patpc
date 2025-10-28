@@ -23,7 +23,7 @@ fi
 
 # Run the period search
 echo "Searching for a period..." 
-TEST_RESULT=`./patpc test.dat 2>&1 | grep 'The peak Hm is at period' | awk 'function abs(x){return ((x < 0.0) ? -x : x)} {if (abs($7-400) > 1 ) print 1 ;else print 0}'`
+TEST_RESULT=$(./patpc test.dat 2>&1 | grep 'The peak Hm is at period' | awk 'function abs(x){return ((x < 0.0) ? -x : x)} {if (abs($7-400) > 1 ) print 1 ;else print 0}')
 
 # Remove files created by the test
 for FILE_TO_REMOVE in binned_lightcurve_time.??? Hm.??? phase_folded_and_binned_lightcurve.??? power.??? test.dat ;do

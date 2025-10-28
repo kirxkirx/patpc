@@ -12,6 +12,7 @@
 #endif
 
 #define TIME_GAP_THRESHOLD_SEC 1000.0
+#define MIN_CHUNK_SIZE 10
 #define MAX_LINE_LENGTH 2048
 
 /* Structure to hold event data for text files */
@@ -126,6 +127,7 @@ int write_text_chunk(TextEvent *events, long start_idx, long end_idx, const char
     }
     
     fclose(outfile);
+    *status = 0;
     return 0;
 }
 
@@ -167,17 +169,10 @@ void get_base_filename(const char *input, char *output, size_t output_size) {
 #ifndef SWIFT_POINTING_EVT_SPLITTER_NOCFITSIO
 
 int copy_fits_structure(fitsfile *infptr, fitsfile *outfptr, int *status) {
-    int ncols, colnum;
-    char keyname[FLEN_KEYWORD];
-    char value[FLEN_VALUE];
-    char comment[FLEN_COMMENT];
     int nkeys, keypos;
     char card[FLEN_CARD];
     
     if (*status) return *status;
-    
-    /* Get number of columns */
-    fits_get_num_cols(infptr, &ncols, status);
     
     /* Copy all header keywords except those that will be written automatically */
     fits_get_hdrspace(infptr, &nkeys, NULL, status);
@@ -210,8 +205,6 @@ int write_chunk(fitsfile *infptr, const char *outfilename, long start_row, long 
     int ncols, colnum, typecode, anynul;
     long nrows_to_copy, repeat, width, row, outrow;
     char colname[FLEN_VALUE];
-    char tform[FLEN_VALUE];
-    char ttype[FLEN_VALUE];
     char **ttype_array;
     char **tform_array;
     void *data_buffer;
@@ -391,15 +384,15 @@ int main(int argc, char **argv) {
 #ifndef SWIFT_POINTING_EVT_SPLITTER_NOCFITSIO
     fitsfile *fptr;
     int colnum_TIME;
-    long num_rows, row;
+    long num_rows;
     long *original_indices;
     char *filename_with_events;
 #endif
     int status;
     double *time_array;
-    char base_filename[FLEN_FILENAME];
-    char output_filename[FLEN_FILENAME];
-    long chunk_start, chunk_end;
+    char base_filename[2000];
+    char output_filename[2100];
+    long chunk_start, chunk_end, chunk_size;
     int chunk_number;
     long i;
     double time_gap;
@@ -500,9 +493,11 @@ int main(int argc, char **argv) {
     } else {
         /* Failed to open as FITS, try as ASCII text file */
         fprintf(stderr, "Failed to open as FITS table, trying as text file\n");
+        status = 0;  /* Reset status for text file reading */
 #else
     /* Compiled without CFITSIO support, read as text file only */
     {
+        status = 0;
 #endif
         
         number_of_events = count_lines_in_ASCII_file(argv[1]);
@@ -589,7 +584,7 @@ int main(int argc, char **argv) {
 #endif
     
     /* Get base filename for output files */
-    get_base_filename(argv[1], base_filename, FLEN_FILENAME);
+    get_base_filename(argv[1], base_filename, sizeof(base_filename));
     
     /* Determine output extension */
     ext_ptr = strrchr(argv[1], '.');
@@ -609,42 +604,49 @@ int main(int argc, char **argv) {
         if (time_gap > TIME_GAP_THRESHOLD_SEC) {
             /* Found a gap */
             chunk_end = i - 1;
+            chunk_size = chunk_end - chunk_start + 1;
             
-            fprintf(stderr, "Gap found: %.1f seconds between event %ld (t=%.2f) and event %ld (t=%.2f)\n",
-                   time_gap, i, time_array[i-1], i+1, time_array[i]);
-            
-            /* Create output filename */
+            /* Only split if the chunk has at least MIN_CHUNK_SIZE events */
+            if (chunk_size >= MIN_CHUNK_SIZE) {
+                fprintf(stderr, "Gap found: %.1f seconds between event %ld (t=%.2f) and event %ld (t=%.2f)\n",
+                       time_gap, i, time_array[i-1], i+1, time_array[i]);
+                
+                /* Create output filename */
 #ifndef SWIFT_POINTING_EVT_SPLITTER_NOCFITSIO
-            if (is_fits_file) {
-                sprintf(output_filename, "%s_%02d.evt", base_filename, chunk_number);
-            } else {
+                if (is_fits_file) {
+                    snprintf(output_filename, sizeof(output_filename), "%s_%02d.evt", base_filename, chunk_number);
+                } else {
 #endif
-                sprintf(output_filename, "%s_%02d%s", base_filename, chunk_number, ext_ptr);
+                    snprintf(output_filename, sizeof(output_filename), "%s_%02d%s", base_filename, chunk_number, ext_ptr);
 #ifndef SWIFT_POINTING_EVT_SPLITTER_NOCFITSIO
-            }
-#endif
-            
-            /* Write this chunk */
-#ifndef SWIFT_POINTING_EVT_SPLITTER_NOCFITSIO
-            if (is_fits_file) {
-                write_chunk(fptr, output_filename, chunk_start + 1, chunk_end + 1, &status);
-                if (status != 0) {
-                    fits_report_error(stderr, status);
-                    break;
                 }
-            } else {
 #endif
-                write_text_chunk(text_events, chunk_start, chunk_end, output_filename, &status);
-                if (status != 0) {
-                    break;
-                }
+                
+                /* Write this chunk */
 #ifndef SWIFT_POINTING_EVT_SPLITTER_NOCFITSIO
-            }
+                if (is_fits_file) {
+                    write_chunk(fptr, output_filename, chunk_start + 1, chunk_end + 1, &status);
+                    if (status != 0) {
+                        fits_report_error(stderr, status);
+                        break;
+                    }
+                } else {
 #endif
-            
-            /* Start new chunk */
-            chunk_number++;
-            chunk_start = i;
+                    write_text_chunk(text_events, chunk_start, chunk_end, output_filename, &status);
+                    if (status != 0) {
+                        break;
+                    }
+#ifndef SWIFT_POINTING_EVT_SPLITTER_NOCFITSIO
+                }
+#endif
+                
+                /* Start new chunk */
+                chunk_number++;
+                chunk_start = i;
+            } else {
+                fprintf(stderr, "Gap found: %.1f seconds between event %ld (t=%.2f) and event %ld (t=%.2f), but chunk only has %ld events (minimum %d required) - not splitting\n",
+                       time_gap, i, time_array[i-1], i+1, time_array[i], chunk_size, MIN_CHUNK_SIZE);
+            }
         }
     }
     
@@ -654,11 +656,11 @@ int main(int argc, char **argv) {
         
 #ifndef SWIFT_POINTING_EVT_SPLITTER_NOCFITSIO
         if (is_fits_file) {
-            sprintf(output_filename, "%s_%02d.evt", base_filename, chunk_number);
+            snprintf(output_filename, sizeof(output_filename), "%s_%02d.evt", base_filename, chunk_number);
             write_chunk(fptr, output_filename, chunk_start + 1, chunk_end + 1, &status);
         } else {
 #endif
-            sprintf(output_filename, "%s_%02d%s", base_filename, chunk_number, ext_ptr);
+            snprintf(output_filename, sizeof(output_filename), "%s_%02d%s", base_filename, chunk_number, ext_ptr);
             write_text_chunk(text_events, chunk_start, chunk_end, output_filename, &status);
 #ifndef SWIFT_POINTING_EVT_SPLITTER_NOCFITSIO
         }
@@ -679,9 +681,13 @@ int main(int argc, char **argv) {
 #endif
     
     if (status == 0) {
-        fprintf(stderr, "\nSuccessfully split file into %d chunk(s)\n", chunk_number);
+        if (chunk_number == 1) {
+            fprintf(stderr, "\nNo gaps found. All events written to a single output file.\n");
+        } else {
+            fprintf(stderr, "\nSuccessfully split file into %d chunks\n", chunk_number);
+        }
     } else {
-        fprintf(stderr, "\nERROR: Failed to split file\n");
+        fprintf(stderr, "\nERROR: Failed to write output file(s)\n");
 #ifndef SWIFT_POINTING_EVT_SPLITTER_NOCFITSIO
         if (is_fits_file) {
             fits_report_error(stderr, status);
