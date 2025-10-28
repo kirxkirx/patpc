@@ -13,7 +13,7 @@ CFITSIO_OPTIONS := $(shell lib/test_cfitsio.sh)
 # no CFITSIO debug
 #CFITSIO_OPTIONS = -DPATPC_NOCFITSIO
 
-all: clean simulator patpc
+all: clean simulator patpc swift_pointing_evt_splitter
 
 simulator: simulator.c
 	cc -Wall -o simulator simulator.c -lm $(GSL_OPTIONS)
@@ -24,8 +24,18 @@ patpc: patpc.c count_lines_in_ASCII_file.h
 	# production
 	cc -Wall -o patpc patpc.c -lm $(GSL_OPTIONS) $(CFITSIO_OPTIONS) $(USE_OMP_OPTIONS)
 
+swift_pointing_evt_splitter: swift_pointing_evt_splitter.c
+	# Check if CFITSIO is available and compile accordingly
+	@if echo "$(CFITSIO_OPTIONS)" | grep -q "NOCFITSIO"; then \
+		echo "Building swift_pointing_evt_splitter without CFITSIO support (text files only)"; \
+		cc -Wall -o swift_pointing_evt_splitter swift_pointing_evt_splitter.c -DSWIFT_POINTING_EVT_SPLITTER_NOCFITSIO -lm; \
+	else \
+		echo "Building swift_pointing_evt_splitter with CFITSIO support (FITS and text files)"; \
+		cc -Wall -o swift_pointing_evt_splitter swift_pointing_evt_splitter.c -lm -lcfitsio; \
+	fi
+
 clean:
-	rm -f simulator patpc *~ lib/*~
+	rm -f simulator patpc swift_pointing_evt_splitter *~ lib/*~
 
 test: patpc
 	@echo "Running tests"
@@ -37,5 +47,3 @@ test: patpc
 
 test_gsl: patpc simulator test_patpc.sh
 	./test_patpc.sh	
-	
-	
