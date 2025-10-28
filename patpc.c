@@ -247,7 +247,7 @@ int main( int argc, char **argv ) {
  // default values of paximum and minimum trial periods and the phase step
  double pmax= CHOOSE_PMAX_AUTOMATICALLY;
  double pmin= 9;
- double phase_step= 0.1;
+ double phase_step= 0.05;
 
  double Nyquist_frequency;
 
