@@ -39,11 +39,11 @@ clean:
 
 test: patpc
 	@echo "Running tests"
-	./patpc test_events.txt 2>&1 | grep 'The peak [[:alpha:]]* is at period' | awk '{if ( sqrt( ($$7-5711.5)*($$7-5711.5) ) < 15.0 ) print "PASS" ;else print "FAIL" }' | { grep --quiet "FAIL" && echo "TEST FAIED" && exit 1 || true; }
-	./patpc test_events.txt 10000 100 0.2 2>&1 | grep 'The peak [[:alpha:]]* is at period' | awk '{if ( sqrt( ($$5711.5-0)*($$7-5711.5) ) < 15.0 ) print "PASS" ;else print "FAIL" }' | { grep --quiet "FAIL" && echo "TEST FAIED" && exit 1 || true; }
-	./patpc test_events.txt 501.486 2>&1 | grep 'single-trial probability' | awk -F' is ' '{print $$2}' | awk '{if ( $$1 > 0.05 ) print "PASS" ;else print "FAIL" }' | { grep --quiet "FAIL" && echo "TEST FAIED" && exit 1 || true; }
+	./patpc test_events.txt 2>&1 | grep 'The peak [[:alpha:]]* is at period' | awk '{if ( sqrt( ($$7-5711.5)*($$7-5711.5) ) < 15.0 ) print "PASS" ;else print "FAIL("$$7")" }' | { grep "FAIL" && echo "TEST FAIED" && exit 1 || true; }
+	./patpc test_events.txt 10000 100 0.2 2>&1 | grep 'The peak [[:alpha:]]* is at period' | awk '{if ( sqrt( ($$5711.5-0)*($$7-5711.5) ) < 15.0 ) print "PASS" ;else print "FAIL("$$7")" }' | { grep "FAIL" && echo "TEST FAIED" && exit 1 || true; }
+	./patpc test_events.txt 501.486 2>&1 | grep 'single-trial probability' | awk -F' is ' '{print $$2}' | awk '{if ( $$1 > 0.05 ) print "PASS" ;else print "FAIL("$$1")" }' | { grep "FAIL" && echo "TEST FAIED" && exit 1 || true; }
 	# end with this test as it will leave behind good looking artifacts
-	./patpc test_events.txt 10000 100 2>&1 | grep 'The peak [[:alpha:]]* is at period' | awk '{if ( sqrt( ($$7-5711.5)*($$7-5711.5) ) < 15.0 ) print "PASS" ;else print "FAIL" }' | { grep --quiet "FAIL" && echo "TEST FAIED" && exit 1 || true; }
+	./patpc test_events.txt 10000 100 2>&1 | grep 'The peak [[:alpha:]]* is at period' | awk '{if ( sqrt( ($$7-5711.5)*($$7-5711.5) ) < 15.0 ) print "PASS" ;else print "FAIL("$$7")" }' | { grep "FAIL" && echo "TEST FAIED" && exit 1 || true; }
 
 test_gsl: patpc simulator test_patpc.sh
 	./test_patpc.sh	
